@@ -51,8 +51,22 @@ def tea_encrypt(v0, v1, key):
     sum_val = 0
     for _ in range(32):
         sum_val = (sum_val + TEA_KEY_SCHEDULE_CONSTANT) & MASK32
-        v0 = (v0 + ((((v1 << 4) & MASK32) + key[0]) ^ ((v1 + sum_val) & MASK32) ^ (((v1 >> 5) & MASK32) + key[1]))) & MASK32
-        v1 = (v1 + ((((v0 << 4) & MASK32) + key[2]) ^ ((v0 + sum_val) & MASK32) ^ (((v0 >> 5) & MASK32) + key[3]))) & MASK32
+        v0 = (
+            v0
+            + (
+                (((v1 << 4) & MASK32) + key[0])
+                ^ ((v1 + sum_val) & MASK32)
+                ^ (((v1 >> 5) & MASK32) + key[1])
+            )
+        ) & MASK32
+        v1 = (
+            v1
+            + (
+                (((v0 << 4) & MASK32) + key[2])
+                ^ ((v0 + sum_val) & MASK32)
+                ^ (((v0 >> 5) & MASK32) + key[3])
+            )
+        ) & MASK32
     return v0, v1
 
 
@@ -136,21 +150,13 @@ def main():
     parser = argparse.ArgumentParser(
         description="Generate a NuttX /etc/passwd entry with TEA-encrypted password."
     )
-    parser.add_argument(
-        "--user", required=True, help="Username for the passwd entry."
-    )
+    parser.add_argument("--user", required=True, help="Username for the passwd entry.")
     parser.add_argument(
         "--password", required=True, help="Plaintext password to encrypt."
     )
-    parser.add_argument(
-        "--uid", type=int, default=0, help="User ID (default: 0)."
-    )
-    parser.add_argument(
-        "--gid", type=int, default=0, help="Group ID (default: 0)."
-    )
-    parser.add_argument(
-        "--home", default="/", help="Home directory (default: /)."
-    )
+    parser.add_argument("--uid", type=int, default=0, help="User ID (default: 0).")
+    parser.add_argument("--gid", type=int, default=0, help="Group ID (default: 0).")
+    parser.add_argument("--home", default="/", help="Home directory (default: /).")
     parser.add_argument(
         "--key1",
         type=parse_hex,

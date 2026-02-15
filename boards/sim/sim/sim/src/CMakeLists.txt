@@ -32,11 +32,13 @@ endif()
 
 if(CONFIG_BOARD_LATE_INITIALIZE)
   list(APPEND SRCS sim_bringup.c)
+
   if(CONFIG_LIBC_ZONEINFO_ROMFS)
     list(APPEND SRCS sim_zoneinfo.c)
   endif()
 elseif(CONFIG_BOARDCTL)
   list(APPEND SRCS sim_bringup.c)
+
   if(CONFIG_LIBC_ZONEINFO_ROMFS)
     list(APPEND SRCS sim_zoneinfo.c)
   endif()

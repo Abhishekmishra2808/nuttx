@@ -71,16 +71,15 @@ endfunction()
 # nuttx_add_romfs
 #
 # Description:
-#   Generates a ROMFS image in a C array, which is built to an OBJECT library.
+# Generates a ROMFS image in a C array, which is built to an OBJECT library.
 #
 # Parameters:
-#   NAME    : determines the romfs label and name of target (romfs_${NAME})
-#   HEADER  : option to indicate that a .h file is to be generated instead of a .c
-#   PREFIX  : optional prefix to add to image name (as romfs_${PREFIX}.img)
-#   NONCONST: option to indicate the array should be non-const
-#   DEPENDS : list of targets that should be depended on
+# NAME    : determines the romfs label and name of target (romfs_${NAME})
+# HEADER  : option to indicate that a .h file is to be generated instead of a .c
+# PREFIX  : optional prefix to add to image name (as romfs_${PREFIX}.img)
+# NONCONST: option to indicate the array should be non-const
+# DEPENDS : list of targets that should be depended on
 # ~~~
-
 function(nuttx_add_romfs)
   nuttx_parse_function_args(
     FUNC
@@ -122,7 +121,7 @@ function(nuttx_add_romfs)
   foreach(rcsrc ${RCSRCS})
     if(IS_ABSOLUTE ${rcsrc})
       string(REGEX REPLACE "^(.*)/etc(/.*)?$" "\\1" SOURCE_ETC_PREFIX
-                           "${rcsrc}")
+        "${rcsrc}")
       string(REGEX REPLACE "^.*/(etc(/.*)?)$" "\\1" REMAINING_PATH "${rcsrc}")
       string(REGEX REPLACE "^/" "" SOURCE_ETC_SUFFIX "${REMAINING_PATH}")
     else()
@@ -131,9 +130,11 @@ function(nuttx_add_romfs)
     endif()
 
     get_filename_component(rcpath ${SOURCE_ETC_SUFFIX} DIRECTORY)
+
     if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/${rcpath})
       file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${rcpath})
     endif()
+
     nuttx_generate_preprocess_target(
       SOURCE_FILE ${SOURCE_ETC_PREFIX}/${SOURCE_ETC_SUFFIX} TARGET_FILE
       ${CMAKE_CURRENT_BINARY_DIR}/${SOURCE_ETC_SUFFIX} DEPENDS nuttx_context)
@@ -141,10 +142,9 @@ function(nuttx_add_romfs)
   endforeach()
 
   foreach(rcraw ${RCRAWS})
-
     if(IS_ABSOLUTE ${rcraw})
       string(REGEX REPLACE "^(.*)/etc(/.*)?$" "\\1" SOURCE_ETC_PREFIX
-                           "${rcraw}")
+        "${rcraw}")
       string(REGEX REPLACE "^.*/(etc(/.*)?)$" "\\1" REMAINING_PATH "${rcraw}")
       string(REGEX REPLACE "^/" "" SOURCE_ETC_SUFFIX "${REMAINING_PATH}")
     else()
@@ -156,16 +156,16 @@ function(nuttx_add_romfs)
       add_custom_command(
         OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${SOURCE_ETC_SUFFIX}
         COMMAND ${CMAKE_COMMAND} -E make_directory
-                ${CMAKE_CURRENT_BINARY_DIR}/${SOURCE_ETC_SUFFIX}
+        ${CMAKE_CURRENT_BINARY_DIR}/${SOURCE_ETC_SUFFIX}
         COMMAND
-          ${CMAKE_COMMAND} -E copy_directory
-          ${SOURCE_ETC_PREFIX}/${SOURCE_ETC_SUFFIX}
-          ${CMAKE_CURRENT_BINARY_DIR}/${SOURCE_ETC_SUFFIX})
+        ${CMAKE_COMMAND} -E copy_directory
+        ${SOURCE_ETC_PREFIX}/${SOURCE_ETC_SUFFIX}
+        ${CMAKE_CURRENT_BINARY_DIR}/${SOURCE_ETC_SUFFIX})
       list(APPEND DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${SOURCE_ETC_SUFFIX})
     else()
       list(APPEND DEPENDS ${SOURCE_ETC_PREFIX}/${SOURCE_ETC_SUFFIX})
       configure_file(${SOURCE_ETC_PREFIX}/${SOURCE_ETC_SUFFIX}
-                     ${CMAKE_CURRENT_BINARY_DIR}/${SOURCE_ETC_SUFFIX} COPYONLY)
+        ${CMAKE_CURRENT_BINARY_DIR}/${SOURCE_ETC_SUFFIX} COPYONLY)
     endif()
   endforeach()
 
@@ -185,11 +185,11 @@ function(nuttx_add_romfs)
     OUTPUT romfs_${NAME}.${EXTENSION}
     COMMAND ${CMAKE_COMMAND} -E make_directory romfs_${NAME}
     COMMAND if \[ \"${PATH}\" != \"\" \]; then ${CMAKE_COMMAND} -E
-            copy_directory ${PATH} romfs_${NAME} \; fi
+    copy_directory ${PATH} romfs_${NAME} \; fi
     COMMAND genromfs -f ${IMGNAME} -d romfs_${NAME} -V ${NAME}
     COMMAND xxd -i ${IMGNAME} romfs_${NAME}.${EXTENSION}
     COMMAND if ! [ -z "${NONCONST}" ]\; then sed -E -i'' -e
-            "s/^unsigned/const unsigned/g" romfs_${NAME}.${EXTENSION} \; fi
+    "s/^unsigned/const unsigned/g" romfs_${NAME}.${EXTENSION} \; fi
     DEPENDS ${DEPENDS})
 
   if(NOT HEADER)
@@ -206,7 +206,6 @@ endfunction()
 # Parameters: - NAME: determines the name of target (cromfs_${NAME}) - PATH: the
 # directory that will be used to create the CROMFS - FILES: paths to files to
 # copy into CROMFS - DEPENDS: list of targets that should be depended on
-
 function(nuttx_add_cromfs)
   nuttx_parse_function_args(
     FUNC
@@ -232,11 +231,11 @@ function(nuttx_add_cromfs)
     OUTPUT cromfs_${NAME}.c
     COMMAND ${CMAKE_COMMAND} -E make_directory cromfs_${NAME}
     COMMAND if \[ \"${PATH}\" != \"\" \]; then ${CMAKE_COMMAND} -E
-            copy_directory ${PATH} cromfs_${NAME} \; fi
+    copy_directory ${PATH} cromfs_${NAME} \; fi
     COMMAND if \[ \"${FILES}\" != \"\" \]; then ${CMAKE_COMMAND} -E copy
-            ${FILES} cromfs_${NAME} \; fi
+    ${FILES} cromfs_${NAME} \; fi
     COMMAND ${CMAKE_BINARY_DIR}/bin_host/gencromfs cromfs_${NAME}
-            cromfs_${NAME}.c
+    cromfs_${NAME}.c
     DEPENDS ${DEPENDS})
 
   add_library(cromfs_${NAME} OBJECT cromfs_${NAME}.c)
@@ -249,7 +248,6 @@ endfunction()
 # so we process all the targets at the end.
 # ~~~
 function(process_all_directory_romfs)
-
   # have we enabled etc romfs?
   if(NOT CONFIG_ETC_ROMFS)
     return()
@@ -287,22 +285,22 @@ function(process_all_directory_romfs)
     if("${CONFIG_ETC_ROMFS_PASSWD_PASSWORD}" STREQUAL "")
       message(
         FATAL_ERROR
-          "CONFIG_ETC_ROMFS_PASSWD_PASSWORD must be set when"
-          " ETC_ROMFS_GENPASSWD is enabled."
-          " Run 'make menuconfig' to set a password.")
+        "CONFIG_ETC_ROMFS_PASSWD_PASSWORD must be set when"
+        " ETC_ROMFS_GENPASSWD is enabled."
+        " Run 'make menuconfig' to set a password.")
     endif()
 
     set(GENPASSWD_OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/etc/passwd)
     add_custom_command(
       OUTPUT ${GENPASSWD_OUTPUT}
       COMMAND
-        ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/etc
+      ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/etc
       COMMAND
-        ${Python3_EXECUTABLE} ${NUTTX_DIR}/tools/mkpasswd.py --user
-        "${CONFIG_ETC_ROMFS_PASSWD_USER}" --password
-        "${CONFIG_ETC_ROMFS_PASSWD_PASSWORD}" --uid
-        ${CONFIG_ETC_ROMFS_PASSWD_UID} --gid ${CONFIG_ETC_ROMFS_PASSWD_GID}
-        --home "${CONFIG_ETC_ROMFS_PASSWD_HOME}" -o ${GENPASSWD_OUTPUT}
+      ${Python3_EXECUTABLE} ${NUTTX_DIR}/tools/mkpasswd.py --user
+      "${CONFIG_ETC_ROMFS_PASSWD_USER}" --password
+      "${CONFIG_ETC_ROMFS_PASSWD_PASSWORD}" --uid
+      ${CONFIG_ETC_ROMFS_PASSWD_UID} --gid ${CONFIG_ETC_ROMFS_PASSWD_GID}
+      --home "${CONFIG_ETC_ROMFS_PASSWD_HOME}" -o ${GENPASSWD_OUTPUT}
       COMMENT "Generating /etc/passwd from Kconfig values")
     add_custom_target(generate_passwd DEPENDS ${GENPASSWD_OUTPUT})
     list(APPEND RCRAWS ${GENPASSWD_OUTPUT})
@@ -310,7 +308,6 @@ function(process_all_directory_romfs)
   endif()
 
   # init dynamic dependencies
-
   get_property(
     dyn_deps
     TARGET romfs_holder
@@ -320,7 +317,7 @@ function(process_all_directory_romfs)
   foreach(rcsrc ${RCSRCS})
     if(IS_ABSOLUTE ${rcsrc})
       string(REGEX REPLACE "^(.*)/etc(/.*)?$" "\\1" SOURCE_ETC_PREFIX
-                           "${rcsrc}")
+        "${rcsrc}")
       string(REGEX REPLACE "^.*/(etc(/.*)?)$" "\\1" REMAINING_PATH "${rcsrc}")
       string(REGEX REPLACE "^/" "" SOURCE_ETC_SUFFIX "${REMAINING_PATH}")
     else()
@@ -329,9 +326,11 @@ function(process_all_directory_romfs)
     endif()
 
     get_filename_component(rcpath ${SOURCE_ETC_SUFFIX} DIRECTORY)
+
     if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/${rcpath})
       file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${rcpath})
     endif()
+
     nuttx_generate_preprocess_target(
       SOURCE_FILE
       ${SOURCE_ETC_PREFIX}/${SOURCE_ETC_SUFFIX}
@@ -347,7 +346,7 @@ function(process_all_directory_romfs)
   foreach(rcraw ${RCRAWS})
     if(IS_ABSOLUTE ${rcraw})
       string(REGEX REPLACE "^(.*)/etc(/.*)?$" "\\1" SOURCE_ETC_PREFIX
-                           "${rcraw}")
+        "${rcraw}")
       string(REGEX REPLACE "^.*/(etc(/.*)?)$" "\\1" REMAINING_PATH "${rcraw}")
       string(REGEX REPLACE "^/" "" SOURCE_ETC_SUFFIX "${REMAINING_PATH}")
     else()
@@ -360,26 +359,28 @@ function(process_all_directory_romfs)
       add_custom_command(
         OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${SOURCE_ETC_SUFFIX}
         COMMAND ${CMAKE_COMMAND} -E make_directory
-                ${CMAKE_CURRENT_BINARY_DIR}/${SOURCE_ETC_SUFFIX}
+        ${CMAKE_CURRENT_BINARY_DIR}/${SOURCE_ETC_SUFFIX}
         COMMAND
-          ${CMAKE_COMMAND} -E copy_directory
-          ${SOURCE_ETC_PREFIX}/${SOURCE_ETC_SUFFIX}
-          ${CMAKE_CURRENT_BINARY_DIR}/${SOURCE_ETC_SUFFIX}
+        ${CMAKE_COMMAND} -E copy_directory
+        ${SOURCE_ETC_PREFIX}/${SOURCE_ETC_SUFFIX}
+        ${CMAKE_CURRENT_BINARY_DIR}/${SOURCE_ETC_SUFFIX}
         DEPENDS ${dyn_deps})
       list(APPEND DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${SOURCE_ETC_SUFFIX})
     else()
       list(FIND DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${SOURCE_ETC_SUFFIX} index)
+
       if(index GREATER -1)
         set(APPEND_OPTION APPEND)
       else()
         set(APPEND_OPTION)
       endif()
+
       list(APPEND DEPENDS ${SOURCE_ETC_PREFIX}/${SOURCE_ETC_SUFFIX})
       add_custom_command(
         OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${SOURCE_ETC_SUFFIX}
         COMMAND
-          ${CMAKE_COMMAND} -E copy ${SOURCE_ETC_PREFIX}/${SOURCE_ETC_SUFFIX}
-          ${CMAKE_CURRENT_BINARY_DIR}/${SOURCE_ETC_SUFFIX} ${APPEND_OPTION}
+        ${CMAKE_COMMAND} -E copy ${SOURCE_ETC_PREFIX}/${SOURCE_ETC_SUFFIX}
+        ${CMAKE_CURRENT_BINARY_DIR}/${SOURCE_ETC_SUFFIX} ${APPEND_OPTION}
         DEPENDS ${dyn_deps})
       list(APPEND DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${SOURCE_ETC_SUFFIX})
     endif()
@@ -389,7 +390,7 @@ function(process_all_directory_romfs)
     OUTPUT romfs_etc.c
     COMMAND ${CMAKE_COMMAND} -E make_directory romfs_etc
     COMMAND if \[ \"etc\" != \"\" \]; then ${CMAKE_COMMAND} -E copy_directory
-            etc romfs_etc \; fi
+    etc romfs_etc \; fi
     COMMAND genromfs -f romfs.img -d romfs_etc -V etc
     COMMAND xxd -i romfs.img romfs_etc.c
     COMMAND sed -E -i'' -e "s/^unsigned/const unsigned/g" romfs_etc.c
