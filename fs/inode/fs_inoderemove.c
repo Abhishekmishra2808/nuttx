@@ -82,7 +82,14 @@ static FAR struct inode *inode_unlink(FAR const char *path)
 #ifdef CONFIG_FS_PERMISSION
       if (desc.parent != NULL)
         {
-          ret = inode_checkperm(desc.parent, W_OK);
+          ret = inode_checksearchpath(desc.parent);
+          if (ret < 0)
+            {
+              inode = NULL;
+              goto errout;
+            }
+
+          ret = inode_permission(desc.parent, W_OK);
           if (ret < 0)
             {
               inode = NULL;

@@ -88,6 +88,14 @@ int nx_unlink(FAR const char *pathname)
 
   if (INODE_IS_MOUNTPT(inode) && inode->u.i_mops)
     {
+      inode_rlock();
+      ret = inode_checksearchpath(inode);
+      inode_runlock();
+      if (ret < 0)
+        {
+          goto errout_with_inode;
+        }
+
       /* Perform the unlink operation using the relative path at the
        * mountpoint.
        */

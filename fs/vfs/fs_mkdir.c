@@ -100,6 +100,15 @@ int mkdir(const char *pathname, mode_t mode)
           goto errout_with_inode;
         }
 
+      inode_rlock();
+      ret = inode_checksearchpath(inode);
+      inode_runlock();
+      if (ret < 0)
+        {
+          errcode = -ret;
+          goto errout_with_inode;
+        }
+
       /* Perform the mkdir operation using the relative path
        * at the mountpoint.
        */

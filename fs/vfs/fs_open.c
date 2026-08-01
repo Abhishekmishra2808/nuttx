@@ -170,17 +170,29 @@ static int file_vopen(FAR struct file *filep, FAR const char *path,
     }
 #endif
 
-  /* Validate operation support and pseudo-filesystem permissions */
+  /* Enforce directory search (X_OK) on ancestors / mount gates, then
+   * validate open modes.  Hold the inode tree read lock so modes cannot
+   * race with concurrent chmod of parents for pseudo nodes.
+   */
+
+  inode_rlock();
+
+  ret = inode_checksearchpath(inode);
+  if (ret < 0)
+    {
+      inode_runlock();
+      goto errout_with_inode;
+    }
 
 #ifndef CONFIG_DISABLE_MOUNTPOINT
   if (INODE_IS_MOUNTPT(inode))
     {
+      inode_runlock();
       ret = inode_checkopenperm(inode, oflags);
     }
   else
 #endif
     {
-      inode_rlock();
       ret = inode_checkopenperm(inode, oflags);
       inode_runlock();
     }

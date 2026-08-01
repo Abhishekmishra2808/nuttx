@@ -91,6 +91,15 @@ int rmdir(FAR const char *pathname)
 
   if (INODE_IS_MOUNTPT(inode) && inode->u.i_mops)
     {
+      inode_rlock();
+      ret = inode_checksearchpath(inode);
+      inode_runlock();
+      if (ret < 0)
+        {
+          errcode = -ret;
+          goto errout_with_inode;
+        }
+
       /* Perform the rmdir operation using the relative path
        * from the mountpoint.
        */

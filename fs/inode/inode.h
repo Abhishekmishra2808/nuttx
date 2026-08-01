@@ -424,30 +424,37 @@ void inode_addref(FAR struct inode *inode);
 void inode_release(FAR struct inode *inode);
 
 /****************************************************************************
- * Name: inode_checkperm
+ * Name: inode_permission
  *
  * Description:
- *   Check 'inode' for 'amode' access on pseudo-filesystem inodes.
- *   NULL 'inode' (root) and mountpoints are exempt.
- *
- * Input Parameters:
- *   inode - Inode to check, or NULL for a root-level path
- *   amode - Access mode bitmask (R_OK / W_OK / X_OK)
- *
- * Returned Value:
- *   Zero (OK) on success, or -EACCES if permission is denied.
+ *   Generic access-mode check against an inode's stored owner/group/mode
+ *   (pseudoFS nodes and mountpoint inodes used as traverse gates).
  *
  ****************************************************************************/
 
-int inode_checkperm(FAR struct inode *inode, int amode);
+int inode_permission(FAR struct inode *inode, int amode);
+
+/****************************************************************************
+ * Name: inode_checksearchpath
+ *
+ * Description:
+ *   Enforce directory search (X_OK) on the path leading to 'inode'.
+ *   Requires X_OK on every ancestor, and on 'inode' itself when it is a
+ *   pseudo directory or a mountpoint (so a private parent directory cannot
+ *   be bypassed by mounting another filesystem beneath it).
+ *
+ ****************************************************************************/
+
+int inode_checksearchpath(FAR struct inode *inode);
 
 /****************************************************************************
  * Name: inode_checkopenperm
  *
  * Description:
  *   Validate open access to 'inode' for 'oflags'.  Checks driver operation
- *   support, then pseudo-filesystem mode bits when enabled.  Mountpoints
- *   are exempt from mode checks.
+ *   support, then mode bits for non-mountpoint inodes.  Mountpoints skip
+ *   open-mode checks here; callers must use inode_checksearchpath() so
+ *   parent / mount directories still require X_OK to traverse.
  *
  * Input Parameters:
  *   inode  - The inode to check

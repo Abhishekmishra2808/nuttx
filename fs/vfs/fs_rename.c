@@ -88,7 +88,12 @@ static int pseudorename(FAR const char *oldpath, FAR struct inode *oldinode,
 
   SETUP_SEARCH(&newdesc, newpath, true);
 
-  ret = inode_checkperm(oldparent, W_OK);
+  /* Ancestor X_OK was already checked by rename() via
+   * inode_checksearchpath(oldinode).  Still require parent W_OK here
+   * under the tree lock before mutating.
+   */
+
+  ret = inode_permission(oldparent, W_OK);
   if (ret < 0)
     {
       goto errout_with_lock;
@@ -305,7 +310,7 @@ static int mountptrename(FAR const char *oldpath, FAR struct inode *oldinode,
     }
 
   /* Get an inode for the new relpath -- it should lie on the same
-   * mountpoint
+   * mountpoint.  Path search on oldinode was already enforced by rename().
    */
 
   SETUP_SEARCH(&newdesc, newpath, true);
@@ -515,6 +520,15 @@ int rename(FAR const char *oldpath, FAR const char *newpath)
 
   oldinode = olddesc.node;
   DEBUGASSERT(oldinode != NULL);
+
+  inode_rlock();
+  ret = inode_checksearchpath(oldinode);
+  inode_runlock();
+  if (ret < 0)
+    {
+      inode_release(oldinode);
+      goto errout_with_oldsearch;
+    }
 
 #ifndef CONFIG_DISABLE_MOUNTPOINT
   /* Verify that the old inode is a valid mountpoint. */

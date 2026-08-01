@@ -229,7 +229,15 @@ int inode_reserve(FAR const char *path,
 #ifdef CONFIG_FS_PERMISSION
   if (parent != NULL)
     {
-      ret = inode_checkperm(parent, W_OK | X_OK);
+      /* Traverse ancestors (X_OK), then require write on the parent. */
+
+      ret = inode_checksearchpath(parent);
+      if (ret < 0)
+        {
+          goto errout_with_search;
+        }
+
+      ret = inode_permission(parent, W_OK);
       if (ret < 0)
         {
           goto errout_with_search;

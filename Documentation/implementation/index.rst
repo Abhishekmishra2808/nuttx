@@ -16,6 +16,7 @@ Implementation Details
    device_nodes.rst
    drivers_design.rst
    file_descriptors.rst
+   fs_permission_iface.rst
    hardfaults.rst
    interrupt_controls.rst
    ioctl.rst

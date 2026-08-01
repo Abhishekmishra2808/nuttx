@@ -94,6 +94,15 @@ ssize_t readlink(FAR const char *path, FAR char *buf, size_t bufsize)
   node = desc.node;
   DEBUGASSERT(node != NULL);
 
+  inode_rlock();
+  ret = inode_checksearchpath(node);
+  inode_runlock();
+  if (ret < 0)
+    {
+      errcode = -ret;
+      goto errout_with_inode;
+    }
+
   /* An inode was found that includes this path and possibly refers to a
    * symbolic link.
    *
