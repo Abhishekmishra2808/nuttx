@@ -90,6 +90,7 @@ static FAR struct inode *inode_unlink(FAR const char *path)
             }
 
           ret = inode_permission(desc.parent, W_OK);
+          ret = inode_checkperm(desc.parent, W_OK);
           if (ret < 0)
             {
               inode = NULL;

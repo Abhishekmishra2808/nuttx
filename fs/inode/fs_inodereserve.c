@@ -238,6 +238,7 @@ int inode_reserve(FAR const char *path,
         }
 
       ret = inode_permission(parent, W_OK);
+      ret = inode_checkperm(parent, W_OK | X_OK);
       if (ret < 0)
         {
           goto errout_with_search;

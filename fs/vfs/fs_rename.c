@@ -86,12 +86,13 @@ static int pseudorename(FAR const char *oldpath, FAR struct inode *oldinode,
 
   inode_lock();
 
-  SETUP_SEARCH(&newdesc, newpath, true);
+  inode_lock();
 
   /* Ancestor X_OK was already checked by rename() via
    * inode_checksearchpath(oldinode).  Still require parent W_OK here
    * under the tree lock before mutating.
    */
+  SETUP_SEARCH(&newdesc, newpath, true);
 
   ret = inode_permission(oldparent, W_OK);
   if (ret < 0)
