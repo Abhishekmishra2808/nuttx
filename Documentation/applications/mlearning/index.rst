@@ -8,10 +8,12 @@ runtimes live in the ``apps/mlearning`` directory of the
 `apps <https://github.com/apache/nuttx-apps>`_ repository, while the numerical
 building blocks they depend on live in ``apps/math`` and ``apps/system``.
 
-All of the packages below are *inference* engines aimed at deeply embedded and
-edge (TinyML) use cases. The framework sources are not vendored into the tree;
-each package downloads and patches a pinned upstream release the first time it
-is built.
+These packages provide *inference* only (there is no on-device training),
+aimed at embedded and edge (TinyML) use cases. Note that ``cmsis`` and
+``cmsis-nn`` are kernel libraries used to accelerate the runtimes rather than
+standalone engines. The upstream sources are not vendored into the tree: each
+package downloads its configured upstream version the first time it is built
+(so an internet connection is required), and some also apply local patches.
 
 Available runtimes
 ==================
