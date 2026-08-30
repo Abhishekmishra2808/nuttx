@@ -82,8 +82,13 @@ fi
 ###############################################################################
 # 4. Companion apps repository
 ###############################################################################
-# NuttX expects the applications in a sibling "apps" directory. Align it to the
-# NuttX revision that is checked out so the two trees stay API compatible.
+# NuttX expects the applications in a sibling "apps" directory. The apps and
+# NuttX trees must stay API compatible, so pin apps to the revision that
+# matches this NuttX snapshot. NuttX and nuttx-apps track together on master;
+# this is the nuttx-apps commit contemporary with the NuttX source here
+# (nuttx-apps master as of 2026-08-19). Bump APPS_REV when advancing NuttX.
+APPS_REV="${NUTTX_APPS_REV:-191e244082c50730063d53ab8ff53cf3802a08ab}"
+
 if [ ! -d "$APPS_DIR/.git" ]; then
   echo "==> Cloning nuttx-apps into $APPS_DIR"
   if [ ! -w "$APPS_PARENT" ]; then
@@ -91,18 +96,11 @@ if [ ! -d "$APPS_DIR/.git" ]; then
     sudo chown "$(id -u):$(id -g)" "$APPS_DIR"
   fi
   git clone "$APPS_REMOTE" "$APPS_DIR"
-else
-  echo "==> Updating existing nuttx-apps checkout"
-  git -C "$APPS_DIR" fetch --quiet origin
 fi
 
-# Check out the apps commit closest to (but not newer than) the NuttX commit.
-NUTTX_DATE="$(git -C "$NUTTX_DIR" log -1 --format=%cI)"
-APPS_REV="$(git -C "$APPS_DIR" rev-list -n 1 --before="$NUTTX_DATE" origin/master || true)"
-if [ -n "$APPS_REV" ]; then
-  echo "==> Checking out apps revision $APPS_REV (<= $NUTTX_DATE)"
-  git -C "$APPS_DIR" checkout -q "$APPS_REV"
-fi
+echo "==> Checking out apps revision $APPS_REV"
+git -C "$APPS_DIR" fetch --quiet origin
+git -C "$APPS_DIR" checkout -q "$APPS_REV"
 
 ###############################################################################
 # 5. Configure and build the simulator
