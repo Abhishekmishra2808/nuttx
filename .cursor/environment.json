@@ -1,0 +1,5 @@
+{
+  "name": "Apache NuttX (sim)",
+  "user": "ubuntu",
+  "install": ".cursor/install.sh"
+}
